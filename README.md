@@ -11,7 +11,7 @@ All in a sleek, dark theme UI.
 
 🚀 Live Demo
 🎮 Game Link
-👉 https://dimensio-opal.vercel.app
+👉 https://dimensio-opal.vercel.app/
 
 Click GAME to jump into a timed dove-shooting experience!
 
