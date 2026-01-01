@@ -1,5 +1,6 @@
 'use client'
 
+import { getLeaderboard, saveScore } from "./leaderboard"
 import { useEffect, useState } from "react"
 import "./game.css"
 
@@ -8,6 +9,12 @@ export default function GamePage() {
   const [time, setTime] = useState(30)
   const [score, setScore] = useState(0)
   const [running, setRunning] = useState(true)
+
+  const [gameOver, setGameOver] = useState(false)
+  const [leaderboard, setLeaderboard] = useState<any[]>([])
+  const [playerName, setPlayerName] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+
 
   
   //Sound
@@ -19,35 +26,46 @@ export default function GamePage() {
     
   // Timer
   useEffect(() => {
-    if (!running) return
-    const t = setInterval(() => {
-      setTime(v => {
-        if (v <= 1) {
-          setRunning(false)
-          return 0
-        }
-        return v - 1
-      })
-    }, 1000)
-    return () => clearInterval(t)
-  }, [running])
+  if (!running) return
+
+  const t = setInterval(() => {
+    setTime(prev => {
+      if (prev <= 1) {
+        clearInterval(t)
+        setRunning(false)
+        setGameOver(true)
+
+        // 👇 FETCH GLOBAL LEADERBOARD
+        getLeaderboard().then(setLeaderboard)
+
+        return 0
+      }
+      return prev - 1
+    })
+  }, 1000)
+
+  return () => clearInterval(t)
+}, [running])
+
 
   // Spawn birds
-  useEffect(() => {
-    if (!running) return
-    const spawn = setInterval(() => {
-      setBirds(b => [
-        ...b,
-        {
-          id: Math.random(),
-          left: Math.random() * 90,
-          speed: 6 + Math.random() * 6
-        }
-      ])
-    }, 700)
+ useEffect(() => {
+  if (!running) return
 
-    return () => clearInterval(spawn)
-  }, [running])
+  const spawn = setInterval(() => {
+    setBirds(b => [
+      ...b,
+      {
+        id: Math.random(),
+        left: Math.random() * 90,
+        speed: 6 + Math.random() * 6
+      }
+    ])
+  }, 700)
+
+  return () => clearInterval(spawn)
+}, [running])
+
 
   const killBird = (id: number, x: number, y: number) => {
   navigator.vibrate?.(20)
@@ -58,44 +76,75 @@ export default function GamePage() {
   setScore(s => s + 5)
 }
 
+return (
+  <div className="game">
+    {gameOver && (
+      <div className="game-over">
+        <h1>Game Over</h1>
+        <p>Your Score: {score}</p>
 
-
-  return (
-    <div className="game">
-      <div className="hud">
-        <div>⏱ {time}s</div>
-        <div>💀 Score: {score}</div>
-      </div>
-
-      {birds.map(b => (
-        <div
-          key={b.id}
-          className="bird"
+        <input
+          type="text"
+          placeholder="Enter your name"
+          value={playerName}
+          onChange={e => setPlayerName(e.target.value)}
+          autoFocus
           style={{
-            left: `${b.left}%`,
-            animationDuration: `${b.speed}s`
+            padding: "12px",
+            borderRadius: "10px",
+            border: "none",
+            outline: "none",
+            width: "220px",
+            fontSize: "16px",
+            marginTop: "10px"
           }}
-          onClick={e =>
-            killBird(
-              b.id,
-              e.clientX,
-              e.clientY
-            )
-          }
         />
-      ))}
 
-      {!running && (
-        <div className="game-over">
-          <h1>Game Over</h1>
-          <p>Final Score: {score}</p>
-          <button onClick={() => window.location.href = "/"}>
-            Back Home
-          </button>
-        </div>
-      )}
+        <button
+          disabled={!playerName.trim() || submitting}
+          onClick={async () => {
+            setSubmitting(true)
+            await saveScore({ name: playerName.trim(), score })
+            const updated = await getLeaderboard()
+            setLeaderboard(updated)
+            setSubmitting(false)
+          }}
+        >
+          {submitting ? "Submitting..." : "Submit Score"}
+        </button>
+
+        <Leaderboard list={leaderboard} />
+
+        <button onClick={() => window.location.reload()}>
+          Play Again
+        </button>
+
+        <button onClick={() => (window.location.href = "/")}>
+          Back Home
+        </button>
+      </div>
+    )}
+
+    <div className="hud">
+      <div>⏱ {time}s</div>
+      <div>💀 Score: {score}</div>
     </div>
-  )
+
+    {birds.map(b => (
+      <div
+        key={b.id}
+        className="bird"
+        style={{
+          left: `${b.left}%`,
+          animationDuration: `${b.speed}s`
+        }}
+        onClick={e => killBird(b.id, e.clientX, e.clientY)}
+      />
+    ))}
+  </div>
+)
+
+ 
 }
 
 // Feather splatter
@@ -115,4 +164,48 @@ function feathers(x: number, y: number) {
     document.body.appendChild(f)
     setTimeout(() => f.remove(), 700)
   }
+}
+
+function Leaderboard({ list }: { list: any[] }) {
+  if (!list.length) return null
+
+  const trophy = (rank: number) => {
+    if (rank === 0) return "🥇"
+    if (rank === 1) return "🥈"
+    if (rank === 2) return "🥉"
+    return `#${rank + 1}`
+  }
+
+  return (
+    <div style={{ marginTop: 20 }}>
+      <h2>🏆 Global Top 10</h2>
+
+      <ol className="leaderboard">
+        {list.map((e, i) => (
+          <li
+            key={e.name}
+            style={{
+              animationDelay: `${i * 80}ms`,
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              fontWeight: i < 3 ? "bold" : "normal",
+              color:
+                i === 0
+                  ? "#FFD700"
+                  : i === 1
+                  ? "#C0C0C0"
+                  : i === 2
+                  ? "#CD7F32"
+                  : "white",
+            }}
+          >
+            <span style={{ fontSize: "20px" }}>{trophy(i)}</span>
+            <span>{e.name}</span>
+            <span style={{ marginLeft: "auto" }}>{e.score}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
 }
