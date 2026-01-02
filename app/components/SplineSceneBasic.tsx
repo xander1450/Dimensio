@@ -83,7 +83,7 @@ function explode(x: number, color: string) {
 
         <div className="controls">
           <button
-            className="primary"
+            className="secondary"
             onClick={() => setRotate(!rotate)}
           >
             {rotate ? "Pause Motion" : "Resume Motion"}
@@ -94,6 +94,16 @@ function explode(x: number, color: string) {
   onClick={() => window.location.href = "/game"}
 >
   GAME
+</button>
+<button 
+className="secondary"
+onClick={() => window.location.href = "/chaos"}>
+  CHAOS
+</button>
+<button 
+className="secondary"
+onClick={() => window.location.href = "/focus"}>
+  FOCUS
 </button>
         </div>
       </div>

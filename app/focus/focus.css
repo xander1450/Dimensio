@@ -1,0 +1,147 @@
+/* PAGE */
+.focus-page {
+  height: 100vh;
+  background: radial-gradient(circle, #0b132b, #000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: white;
+  position: relative;
+}
+
+/* CHAKRA BACKGROUND */
+
+.chakra-bg {
+  position: absolute;
+  inset: 0;
+  background: url("/focus.png") center/cover no-repeat;
+  opacity: 0.15;
+  z-index: 0;
+  filter: blur(1px) saturate(1.1);
+}
+
+
+/* BREATHING */
+.breath-container {
+  position: absolute;
+  left: 40px;
+  height: 300px;
+  width: 20px;
+  display: flex;
+  align-items: flex-end;
+  z-index: 1;
+}
+
+.breath-bar {
+  width: 100%;
+  background: linear-gradient(to top, #00f5d4, #80ffdb);
+  border-radius: 10px;
+  transition: height 4s ease-in-out;
+}
+
+/* INHALE / EXHALE HEIGHT */
+.breath-bar.inhale {
+  height: 100%;
+}
+
+.breath-bar.exhale {
+  height: 20%;
+}
+
+.breath-label {
+  position: absolute;
+  bottom: -30px;
+  left: -10px;
+  font-size: 12px;
+  letter-spacing: 2px;
+  opacity: 0.7;
+}
+
+/* CONTENT */
+.focus-content {
+  position: relative;
+  text-align: center;
+  z-index: 2;
+}
+
+.timer {
+  font-size: 64px;
+  margin: 20px 0;
+  letter-spacing: 2px;
+}
+
+.buttons button {
+  margin: 0 10px;
+  padding: 10px 24px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  background: white;
+  color: black;
+  font-size: 16px;
+}
+
+.prompt {
+  margin-top: 20px;
+  opacity: 0.6;
+  font-size: 14px;
+}
+
+/* =========================
+   📈 LIFE FREQUENCY LINE
+========================= */
+.life-line {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  width: 220px;
+  height: 60px;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(0, 255, 200, 0.6),
+    rgba(0, 255, 200, 0.6) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  opacity: 0.6;
+  animation: lifeFlow 6s linear infinite;
+  border-radius: 8px;
+}
+
+/* subtle response to breathing */
+/* =========================
+   ❤️ ECG LIFE LINE
+========================= */
+.ecg-container {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 220px;
+  height: 60px;
+  overflow: hidden;
+  z-index: 3;
+}
+
+.ecg {
+  width: 400px;
+  height: 60px;
+  animation: ecgMove 2s linear infinite;
+}
+
+@keyframes ecgMove {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-180px);
+  }
+}
+@keyframes lifeFlow {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 100px 100px;
+  }
+}
